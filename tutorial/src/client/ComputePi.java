@@ -38,15 +38,19 @@ import compute.Compute;
 
 public class ComputePi {
 	public static void main(String args[]) {
+		// Security Manager erstellen wenn nicht vorhanden
 		if (System.getSecurityManager() == null) {
 			System.setSecurityManager(new SecurityManager());
 		}
 		try {
 			String name = "Compute";
+			// Registry abfragen
 			Registry registry = LocateRegistry.getRegistry(1234);
 			Compute comp = (Compute) registry.lookup(name);
+			// Neuen Task erstellen
 			Pi task = new Pi(Integer.parseInt(args[0]));
 			BigDecimal pi = comp.executeTask(task);
+			// Ergebnis ausgeben
 			System.out.println(pi);
 		} catch (Exception e) {
 			System.err.println("ComputePi exception:");

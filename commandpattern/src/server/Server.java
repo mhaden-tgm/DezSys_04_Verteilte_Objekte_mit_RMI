@@ -7,24 +7,31 @@ import java.rmi.server.UnicastRemoteObject;
 
 import remoteService.DoSomethingService;
 
+/**
+ * 
+ * @author mhaden
+ *
+ */
 public class Server {
 
 	/**
-	 * @param args
+	 * @param args argumente
 	 */
 	public static void main(String[] args) {
-
+		// SecurityManager erstellen
 		if (System.getSecurityManager() == null) {
 			System.setSecurityManager(new SecurityManager());
 		}
 		try {
 			ServerService uRemoteObject = new ServerService();
 			DoSomethingService stub = (DoSomethingService) UnicastRemoteObject.exportObject(uRemoteObject, 0);
+			// Neue Registry erstellen
 			Registry registry = LocateRegistry.createRegistry(1234);
 			registry.rebind("Service", stub);
 			System.out.println("Service bound! Press Enter to terminate ...");
 
-			while ( System.in.read() != '\n' );
+			while (System.in.read() != '\n')
+				;
 			UnicastRemoteObject.unexportObject(uRemoteObject, true);
 
 			System.out.println("Service unbound, System goes down ...");

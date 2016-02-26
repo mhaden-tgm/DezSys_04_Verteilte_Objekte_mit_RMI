@@ -27,99 +27,103 @@
  * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */ 
+ */
 
 package server.commands;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.rmi.RemoteException;
+
+import callback.Callback;
 
 public class Pi implements Command<BigDecimal>, Serializable {
 
-    private static final long serialVersionUID = 227L;
+	private static final long serialVersionUID = 227L;
 
-    /** constants used in pi computation */
-    private static final BigDecimal FOUR =
-        BigDecimal.valueOf(4);
+	private Callback callback;
+	private BigDecimal result;
 
-    /** rounding mode to use during pi computation */
-    private static final int roundingMode = 
-        BigDecimal.ROUND_HALF_EVEN;
+	/** constants used in pi computation */
+	private static final BigDecimal FOUR = BigDecimal.valueOf(4);
 
-    /** digits of precision after the decimal point */
-    private final int digits;
-    
-    /**
-     * Construct a task to calculate pi to the specified
-     * precision.
-     */
-    public Pi(int digits) {
-        this.digits = digits;
-    }
+	/** rounding mode to use during pi computation */
+	private static final int roundingMode = BigDecimal.ROUND_HALF_EVEN;
 
-    /**
-     * Calculate pi.
-     */
-    public BigDecimal execute() {
-        return computePi(digits);
-    }
+	/** digits of precision after the decimal point */
+	private final int digits;
 
-    /**
-     * Compute the value of pi to the specified number of 
-     * digits after the decimal point.  The value is 
-     * computed using Machin's formula:
-     *
-     *          pi/4 = 4*arctan(1/5) - arctan(1/239)
-     *
-     * and a power series expansion of arctan(x) to 
-     * sufficient precision.
-     */
-    public static BigDecimal computePi(int digits) {
-        int scale = digits + 5;
-        BigDecimal arctan1_5 = arctan(5, scale);
-        BigDecimal arctan1_239 = arctan(239, scale);
-        BigDecimal pi = arctan1_5.multiply(FOUR).subtract(
-                                  arctan1_239).multiply(FOUR);
-        return pi.setScale(digits, 
-                           BigDecimal.ROUND_HALF_UP);
-    }
-    /**
-     * Compute the value, in radians, of the arctangent of 
-     * the inverse of the supplied integer to the specified
-     * number of digits after the decimal point.  The value
-     * is computed using the power series expansion for the
-     * arc tangent:
-     *
-     * arctan(x) = x - (x^3)/3 + (x^5)/5 - (x^7)/7 + 
-     *     (x^9)/9 ...
-     */   
-    public static BigDecimal arctan(int inverseX, 
-                                    int scale) 
-    {
-        BigDecimal result, numer, term;
-        BigDecimal invX = BigDecimal.valueOf(inverseX);
-        BigDecimal invX2 = 
-            BigDecimal.valueOf(inverseX * inverseX);
+	/**
+	 * Construct a task to calculate pi to the specified precision.
+	 */
+	public Pi(int digits, Callback cb) {
+		this.digits = digits;
+		this.callback = cb;
+	}
 
-        numer = BigDecimal.ONE.divide(invX,
-                                      scale, roundingMode);
+	/**
+	 * Ergebnis senden
+	 */
+	public void send() {
+		try {
+			callback.receive(result);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+	}
 
-        result = numer;
-        int i = 1;
-        do {
-            numer = 
-                numer.divide(invX2, scale, roundingMode);
-            int denom = 2 * i + 1;
-            term = 
-                numer.divide(BigDecimal.valueOf(denom),
-                             scale, roundingMode);
-            if ((i % 2) != 0) {
-                result = result.subtract(term);
-            } else {
-                result = result.add(term);
-            }
-            i++;
-        } while (term.compareTo(BigDecimal.ZERO) != 0);
-        return result;
-    }
+	/**
+	 * Calculate pi.
+	 */
+	public void execute() {
+		computePi();
+		send();
+	}
+
+	/**
+	 * Compute the value of pi to the specified number of digits after the
+	 * decimal point. The value is computed using Machin's formula:
+	 *
+	 * pi/4 = 4*arctan(1/5) - arctan(1/239)
+	 *
+	 * and a power series expansion of arctan(x) to sufficient precision.
+	 */
+	public void computePi() {
+		int scale = digits + 5;
+		BigDecimal arctan1_5 = arctan(5, scale);
+		BigDecimal arctan1_239 = arctan(239, scale);
+		BigDecimal pi = arctan1_5.multiply(FOUR).subtract(arctan1_239).multiply(FOUR);
+		result = pi.setScale(digits, BigDecimal.ROUND_HALF_UP);
+	}
+
+	/**
+	 * Compute the value, in radians, of the arctangent of the inverse of the
+	 * supplied integer to the specified number of digits after the decimal
+	 * point. The value is computed using the power series expansion for the arc
+	 * tangent:
+	 *
+	 * arctan(x) = x - (x^3)/3 + (x^5)/5 - (x^7)/7 + (x^9)/9 ...
+	 */
+	public static BigDecimal arctan(int inverseX, int scale) {
+		BigDecimal result, numer, term;
+		BigDecimal invX = BigDecimal.valueOf(inverseX);
+		BigDecimal invX2 = BigDecimal.valueOf(inverseX * inverseX);
+
+		numer = BigDecimal.ONE.divide(invX, scale, roundingMode);
+
+		result = numer;
+		int i = 1;
+		do {
+			numer = numer.divide(invX2, scale, roundingMode);
+			int denom = 2 * i + 1;
+			term = numer.divide(BigDecimal.valueOf(denom), scale, roundingMode);
+			if ((i % 2) != 0) {
+				result = result.subtract(term);
+			} else {
+				result = result.add(term);
+			}
+			i++;
+		} while (term.compareTo(BigDecimal.ZERO) != 0);
+		return result;
+	}
 }

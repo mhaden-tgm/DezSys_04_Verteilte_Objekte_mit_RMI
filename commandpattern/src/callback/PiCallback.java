@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.rmi.RemoteException;
 
 /**
+ * Implementation des Callback Interfaces
  * 
  * @author mhaden
  *

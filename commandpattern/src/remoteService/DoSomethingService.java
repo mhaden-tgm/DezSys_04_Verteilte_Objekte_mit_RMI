@@ -13,5 +13,11 @@ import server.commands.Command;
  *
  */
 public interface DoSomethingService extends Remote {
+	/**
+	 * Aufgabe ausfuehren
+	 * 
+	 * @param c auszufuehrende aufgabe
+	 * @throws RemoteException
+	 */
 	void executeTask(Command<BigDecimal> c) throws RemoteException;
 }

@@ -6,6 +6,7 @@ import remoteService.DoSomethingService;
 import server.commands.Command;
 
 /**
+ * Interface DoSomethingService implementation
  * 
  * @author mhaden
  *

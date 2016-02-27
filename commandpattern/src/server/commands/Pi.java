@@ -37,6 +37,13 @@ import java.rmi.RemoteException;
 
 import callback.Callback;
 
+/**
+ * 
+ * Berechnung von Pi bis zu einer gewaehlten Stelle
+ * 
+ * @author mhaden
+ *
+ */
 public class Pi implements Command<BigDecimal>, Serializable {
 
 	private static final long serialVersionUID = 227L;
@@ -55,6 +62,9 @@ public class Pi implements Command<BigDecimal>, Serializable {
 
 	/**
 	 * Construct a task to calculate pi to the specified precision.
+	 * 
+	 * @param digits anzahl an stellen
+	 * @param cb callback
 	 */
 	public Pi(int digits, Callback cb) {
 		this.digits = digits;
@@ -68,7 +78,7 @@ public class Pi implements Command<BigDecimal>, Serializable {
 		try {
 			callback.receive(result);
 		} catch (RemoteException e) {
-			e.printStackTrace();
+			e.getMessage();
 		}
 	}
 

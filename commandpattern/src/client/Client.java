@@ -13,7 +13,8 @@ import server.commands.Command;
 import server.commands.Pi;
 
 /**
- * Client
+ * Clientprogramm aus Userseite zum verbinden zu dem Server und 
+ * ausfuehren des Berechnung
  * 
  * @author mhaden
  *
@@ -27,7 +28,7 @@ public class Client {
 	 *            argumente
 	 */
 	public static void main(String[] args) {
-		// Neuen SecurityManager erzeugen
+		// Neuen SecurityManager erzeugen wenn keiner vorhanden ist
 		if (System.getSecurityManager() == null) {
 			System.setSecurityManager(new SecurityManager());
 		}
@@ -36,13 +37,15 @@ public class Client {
 			Registry registry = LocateRegistry.getRegistry(1234);
 			// Callback Objekt erstellen
 			Callback cb = new PiCallback();
-			// Stub erstellen
+			// Stub erstellen mit Callback Objekt
 			Callback cbStub = (Callback) UnicastRemoteObject.exportObject(cb, 0);
-			// Registry auslesen
+			// ServerService Objekt unter dem Namen Service aus Registry auslesen
 			DoSomethingService uRemoteObject = (DoSomethingService) registry.lookup("Service");
+			// Nachricht bei Erfolg
 			System.out.println("Service found");
-
+			// Neues Objekt von Pi Berechnung erstellen
 			Command<BigDecimal> rc = new Pi(Integer.parseInt(args[0]), cbStub);
+			// Pi Obejekt uebergeben und berechnung auf Serverseite ausfuehren
 			uRemoteObject.executeTask(rc);
 
 		} catch (RemoteException re) {
